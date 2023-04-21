@@ -1,0 +1,7 @@
+services:
+  distribution:
+    image: distribution/distribution:latest
+    ports:
+      - "6000:5000"
+    environment:
+      REGISTRY_LOG_LEVEL: info
