@@ -828,7 +828,6 @@ dependencies = [
 [[package]]
 name = "oci-distribution"
 version = "0.10.0"
-source = "git+https://github.com/lswith/oci-distribution.git?branch=next#79abd0ce86c40b1e64d272355e28383ddd984065"
 dependencies = [
  "chrono",
  "futures",
@@ -1079,6 +1078,7 @@ name = "registry-load-tester"
 version = "0.1.0"
 dependencies = [
  "flate2",
+ "futures",
  "oci-distribution",
  "rand",
  "serde",
@@ -1088,6 +1088,7 @@ dependencies = [
  "tracing",
  "tracing-log",
  "tracing-subscriber",
+ "url",
 ]
 
 [[package]]

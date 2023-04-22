@@ -9,7 +9,7 @@ use tracing::instrument;
 
 use crate::image::Image;
 
-#[instrument(err)]
+#[instrument(level = "trace", err)]
 pub async fn pull_image(
     protocol: ClientProtocol,
     image: Reference,
@@ -48,7 +48,7 @@ pub async fn pull_image(
     })
 }
 
-#[instrument(skip(layers, config), err)]
+#[instrument(level = "trace", skip(layers, config), err)]
 pub async fn push_image(
     layers: Vec<ImageLayer>,
     config: Config,
@@ -69,5 +69,5 @@ pub async fn push_image(
             .await?;
     }
 
-    client.push(&image, &layers, config, auth, manifest).await
+    client.push(&image, layers, config, auth, manifest).await
 }

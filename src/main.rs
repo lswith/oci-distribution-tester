@@ -2,39 +2,11 @@ use std::env;
 
 use oci_distribution::{
     client::{ClientProtocol, PushResponse},
+    secrets::RegistryAuth,
     Reference,
 };
-use registry_load_tester::fake::MEGABYTE;
-use tracing::{debug, info, instrument};
+use tracing::{debug, error, info, instrument};
 use tracing_subscriber::filter::{EnvFilter, LevelFilter};
-
-#[instrument]
-async fn push_fake() {
-    let layers = registry_load_tester::fake::gen_rand_layers(10 * MEGABYTE, 10);
-    let image = registry_load_tester::fake::gen_image(layers).unwrap();
-
-    let reference: Reference = "lswith/test:latest".parse().unwrap();
-
-    let user = env::var("DOCKER_USER").unwrap();
-    let password = env::var("DOCKER_PASSWORD").unwrap();
-    let auth =
-        oci_distribution::secrets::RegistryAuth::Basic(user.to_string(), password.to_string());
-
-    info!("pushing image");
-
-    let resp: PushResponse = registry_load_tester::client::push_image(
-        image.layers,
-        image.config,
-        reference,
-        image.manifest,
-        &auth,
-        ClientProtocol::Https,
-    )
-    .await
-    .unwrap();
-
-    debug!("{}", resp.manifest_url);
-}
 
 #[instrument]
 async fn pull_docker_reg_push_docker_reg() {
@@ -186,15 +158,51 @@ async fn pull_local_push_local() {
 
 #[tokio::main]
 async fn main() {
-    let filter = EnvFilter::from_default_env().add_directive(LevelFilter::DEBUG.into());
+    let filter = EnvFilter::from_default_env().add_directive(LevelFilter::INFO.into());
 
     tracing_subscriber::fmt()
         .with_env_filter(filter)
         .try_init()
         .unwrap();
 
-    // push_fake().await;
-    // pull_docker_reg_push_local().await
-    // pull_local_push_docker_reg().await
-    pull_local_push_local().await
+    let thread_count = env::var("THREAD_COUNT")
+        .unwrap_or("100".to_string())
+        .parse()
+        .unwrap();
+
+    let reg_url = env::var("REGISTRY_URL").unwrap_or("http://localhost:6000".to_string());
+    let reg_url = url::Url::parse(&reg_url).unwrap();
+    let reg_host = reg_url.host_str().unwrap();
+    let reg_port = reg_url.port();
+    let reg_protocol = reg_url.scheme();
+
+    let mut reg = reg_host.to_string();
+
+    if let Some(port) = reg_port {
+        reg.push(':');
+        reg.push_str(&port.to_string());
+    }
+
+    let protocol = match reg_protocol {
+        "http" => ClientProtocol::Http,
+        "https" => ClientProtocol::Https,
+        _ => panic!("Unknown protocol"),
+    };
+
+    let user = env::var("DOCKER_USER");
+    let password = env::var("DOCKER_PASSWORD");
+
+    let mut auth = RegistryAuth::Anonymous;
+
+    if let Ok(user) = user {
+        if let Ok(password) = password {
+            auth = RegistryAuth::Basic(user, password);
+        }
+    }
+
+    info!("Starting load test with {thread_count} threads");
+    let res = registry_load_tester::tester::load_test(thread_count, reg, auth, protocol).await;
+    if let Err(e) = res {
+        error!("{}", e);
+    }
 }
