@@ -1,40 +1,122 @@
+use std::env;
+
 use oci_distribution::{
-    client::{ClientConfig, ClientProtocol},
+    client::{ClientProtocol, PushResponse},
     Reference,
 };
-use tracing::info;
+use registry_load_tester::fake::MEGABYTE;
+use tracing::{debug, info, instrument};
 use tracing_subscriber::filter::{EnvFilter, LevelFilter};
+
+#[instrument]
+async fn push_fake() {
+    let layers = registry_load_tester::fake::gen_rand_layers(10 * MEGABYTE, 10);
+    let image = registry_load_tester::fake::gen_image(layers).unwrap();
+
+    let reference: Reference = "lswith/test:latest".parse().unwrap();
+
+    let user = env::var("DOCKER_USER").unwrap();
+    let password = env::var("DOCKER_PASSWORD").unwrap();
+    let auth =
+        oci_distribution::secrets::RegistryAuth::Basic(user.to_string(), password.to_string());
+
+    info!("pushing image");
+
+    let resp: PushResponse = registry_load_tester::client::push_image(
+        image.layers,
+        image.config,
+        reference,
+        image.manifest,
+        auth,
+        ClientProtocol::Https,
+    )
+    .await
+    .unwrap();
+
+    debug!("{}", resp.manifest_url);
+}
+
+#[instrument]
+async fn pull_push_docker_reg() {
+    let image_ref = "localhost:6000/test/this:old".parse().unwrap();
+
+    info!("pulling image {image_ref}");
+    let image = registry_load_tester::client::pull_image(
+        ClientProtocol::Http,
+        image_ref,
+        oci_distribution::secrets::RegistryAuth::Anonymous,
+    )
+    .await
+    .unwrap();
+
+    debug!("got image {image:?}");
+
+    let reference: Reference = "lswith/test:latest".parse().unwrap();
+
+    let user = env::var("DOCKER_USER").unwrap();
+    let password = env::var("DOCKER_PASSWORD").unwrap();
+    let auth =
+        oci_distribution::secrets::RegistryAuth::Basic(user.to_string(), password.to_string());
+
+    info!("pushing image");
+
+    let resp: PushResponse = registry_load_tester::client::push_image(
+        image.layers,
+        image.config,
+        reference,
+        image.manifest,
+        auth,
+        ClientProtocol::Https,
+    )
+    .await
+    .unwrap();
+
+    debug!("{}", resp.manifest_url);
+}
+
+#[instrument]
+async fn pull_push_local() {
+    let image_ref = "localhost:6000/test/this:old".parse().unwrap();
+
+    info!("pulling image {image_ref}");
+    let image = registry_load_tester::client::pull_image(
+        ClientProtocol::Http,
+        image_ref,
+        oci_distribution::secrets::RegistryAuth::Anonymous,
+    )
+    .await
+    .unwrap();
+
+    debug!("got image {image:?}");
+
+    let image_ref = "localhost:6000/test/this:new".parse().unwrap();
+
+    info!("pushing image");
+
+    let resp: PushResponse = registry_load_tester::client::push_image(
+        image.layers,
+        image.config,
+        image_ref,
+        image.manifest,
+        oci_distribution::secrets::RegistryAuth::Anonymous,
+        ClientProtocol::Https,
+    )
+    .await
+    .unwrap();
+
+    debug!("{}", resp.manifest_url);
+}
 
 #[tokio::main]
 async fn main() {
-    let filter = EnvFilter::from_default_env().add_directive(LevelFilter::TRACE.into());
+    let filter = EnvFilter::from_default_env().add_directive(LevelFilter::DEBUG.into());
 
     tracing_subscriber::fmt()
         .with_env_filter(filter)
         .try_init()
         .unwrap();
 
-    info!("creating fake tar data");
-    let tar = registry_load_tester::fake::fake_tar_data();
-    info!("creating fake image layer");
-    let layer = registry_load_tester::fake::fake_image_layer(tar);
-    let layers = &[layer];
-    info!("creating client");
-    let mut client = oci_distribution::client::Client::new(ClientConfig {
-        protocol: ClientProtocol::Http,
-        ..ClientConfig::default()
-    });
-    let reference: Reference = "localhost:6000/test/this:latest".parse().unwrap();
-    let config = oci_distribution::client::Config::oci_v1(b"{}".to_vec(), None);
-    info!("creating manifest");
-    let image_manifest = oci_distribution::manifest::OciImageManifest::build(layers, &config, None);
-
-    let auth = oci_distribution::secrets::RegistryAuth::Anonymous;
-
-    info!("pushing");
-    client
-        .push(&reference, layers, config, &auth, Some(image_manifest))
-        .await
-        .map(|push_response| push_response.manifest_url)
-        .unwrap();
+    push_fake().await;
+    // pull_push_docker_reg().await;
+    // pull_push_local().await;
 }
