@@ -55,7 +55,7 @@ async fn pull_docker_reg_push_docker_reg() {
     let reference: Reference = "lswith/alpine:latest".parse().unwrap();
 
     let mut manifest = image.manifest.unwrap();
-    manifest.media_type = None;
+    manifest.media_type = Some(oci_distribution::manifest::OCI_IMAGE_MEDIA_TYPE.to_string());
 
     info!("pushing image");
 
