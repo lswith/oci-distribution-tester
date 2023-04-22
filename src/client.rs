@@ -1,12 +1,11 @@
 use oci_distribution::{
     client::{ClientConfig, ClientProtocol, Config, ImageLayer, PushResponse},
-    config::ConfigFile,
     errors::OciDistributionError,
     manifest::OciImageManifest,
     secrets::RegistryAuth,
     Reference,
 };
-use tracing::{debug, instrument};
+use tracing::instrument;
 
 use crate::image::Image;
 
@@ -41,23 +40,18 @@ pub async fn pull_image(
         )
         .await?;
 
-    let d = String::from_utf8(image.config.data.clone()).unwrap();
-    debug!("{}", d);
-    let config: oci_distribution::config::ConfigFile = serde_json::from_str(&d).unwrap();
-    debug!("{:?}", config);
-
     Ok(Image {
         manifest: image.manifest,
-        config,
+        config: image.config,
         layers: image.layers,
         digest: image.digest,
     })
 }
 
-#[instrument(skip(layers), err)]
+#[instrument(skip(layers, config), err)]
 pub async fn push_image(
     layers: Vec<ImageLayer>,
-    config: ConfigFile,
+    config: Config,
     image: Reference,
     manifest: Option<OciImageManifest>,
     auth: &RegistryAuth,
@@ -74,8 +68,6 @@ pub async fn push_image(
             .auth(&image, auth, oci_distribution::RegistryOperation::Push)
             .await?;
     }
-
-    let config = Config::oci_v1_from_config_file(config, None)?;
 
     client.push(&image, &layers, config, auth, manifest).await
 }

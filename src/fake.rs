@@ -53,8 +53,7 @@ pub fn gen_image(layers: Vec<ImageLayer>) -> Result<Image, OciDistributionError>
         ..Default::default()
     };
 
-    let config =
-        oci_distribution::client::Config::oci_v1_from_config_file(config_file.clone(), None)?;
+    let config = oci_distribution::client::Config::oci_v1_from_config_file(config_file, None)?;
 
     let mut manifest =
         oci_distribution::manifest::OciImageManifest::build(layers.as_ref(), &config, None);
@@ -64,7 +63,7 @@ pub fn gen_image(layers: Vec<ImageLayer>) -> Result<Image, OciDistributionError>
 
     Ok(Image {
         manifest: Some(manifest),
-        config: config_file,
+        config,
         layers,
         digest: Some(digest),
     })

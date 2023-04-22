@@ -54,13 +54,16 @@ async fn pull_docker_reg_push_docker_reg() {
 
     let reference: Reference = "lswith/alpine:latest".parse().unwrap();
 
+    let mut manifest = image.manifest.unwrap();
+    manifest.media_type = None;
+
     info!("pushing image");
 
     let resp: PushResponse = registry_load_tester::client::push_image(
         image.layers,
         image.config,
         reference,
-        image.manifest,
+        Some(manifest),
         &auth,
         ClientProtocol::Https,
     )
