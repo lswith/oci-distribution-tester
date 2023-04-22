@@ -95,12 +95,14 @@ async fn pull_local_push_docker_reg() {
         oci_distribution::secrets::RegistryAuth::Basic(user.to_string(), password.to_string());
 
     info!("pushing image");
+    let mut manifest = image.manifest.unwrap();
+    manifest.media_type = Some(oci_distribution::manifest::OCI_IMAGE_MEDIA_TYPE.to_string());
 
     let resp: PushResponse = registry_load_tester::client::push_image(
         image.layers,
         image.config,
         reference,
-        image.manifest,
+        Some(manifest),
         &auth,
         ClientProtocol::Https,
     )
@@ -190,5 +192,6 @@ async fn main() {
         .unwrap();
 
     // push_fake().await;
-    pull_docker_reg_push_local().await
+    // pull_docker_reg_push_local().await
+    pull_local_push_docker_reg().await
 }
