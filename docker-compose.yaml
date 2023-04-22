@@ -1,6 +1,6 @@
 services:
   distribution:
-    image: lswith/registry:3
+    image: lswith/registry:4.0-arm
     ports:
       - "6000:5000"
     environment:
