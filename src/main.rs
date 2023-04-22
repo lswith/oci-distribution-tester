@@ -150,7 +150,7 @@ async fn pull_docker_reg_push_local() {
 }
 
 #[instrument]
-async fn pull_push_local() {
+async fn pull_local_push_local() {
     let image_ref = "localhost:6000/test/this:old".parse().unwrap();
 
     info!("pulling image {image_ref}");
@@ -167,14 +167,16 @@ async fn pull_push_local() {
     let image_ref = "localhost:6000/test/this:new".parse().unwrap();
 
     info!("pushing image");
+    let mut manifest = image.manifest.unwrap();
+    manifest.media_type = Some(oci_distribution::manifest::OCI_IMAGE_MEDIA_TYPE.to_string());
 
     let resp: PushResponse = registry_load_tester::client::push_image(
         image.layers,
         image.config,
         image_ref,
-        image.manifest,
+        Some(manifest),
         &oci_distribution::secrets::RegistryAuth::Anonymous,
-        ClientProtocol::Https,
+        ClientProtocol::Http,
     )
     .await
     .unwrap();
@@ -193,5 +195,6 @@ async fn main() {
 
     // push_fake().await;
     // pull_docker_reg_push_local().await
-    pull_local_push_docker_reg().await
+    // pull_local_push_docker_reg().await
+    pull_local_push_local().await
 }
