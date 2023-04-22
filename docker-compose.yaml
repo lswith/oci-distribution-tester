@@ -1,6 +1,6 @@
 services:
   distribution:
-    image: distribution/distribution:latest
+    image: lswith/registry:3
     ports:
       - "6000:5000"
     environment:
