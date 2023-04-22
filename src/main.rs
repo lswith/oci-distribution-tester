@@ -27,7 +27,7 @@ async fn push_fake() {
         image.config,
         reference,
         image.manifest,
-        auth,
+        &auth,
         ClientProtocol::Https,
     )
     .await
@@ -37,14 +37,47 @@ async fn push_fake() {
 }
 
 #[instrument]
-async fn pull_push_docker_reg() {
+async fn pull_docker_reg_push_docker_reg() {
+    let user = env::var("DOCKER_USER").unwrap();
+    let password = env::var("DOCKER_PASSWORD").unwrap();
+    let auth =
+        oci_distribution::secrets::RegistryAuth::Basic(user.to_string(), password.to_string());
+
+    let image_ref = "alpine:latest".parse().unwrap();
+
+    info!("pulling image {image_ref}");
+    let image = registry_load_tester::client::pull_image(ClientProtocol::Https, image_ref, &auth)
+        .await
+        .unwrap();
+
+    debug!("got image {image:?}");
+
+    let reference: Reference = "lswith/alpine:latest".parse().unwrap();
+
+    info!("pushing image");
+
+    let resp: PushResponse = registry_load_tester::client::push_image(
+        image.layers,
+        image.config,
+        reference,
+        image.manifest,
+        &auth,
+        ClientProtocol::Https,
+    )
+    .await
+    .unwrap();
+
+    debug!("{}", resp.manifest_url);
+}
+#[instrument]
+async fn pull_local_push_docker_reg() {
     let image_ref = "localhost:6000/test/this:old".parse().unwrap();
 
     info!("pulling image {image_ref}");
     let image = registry_load_tester::client::pull_image(
         ClientProtocol::Http,
         image_ref,
-        oci_distribution::secrets::RegistryAuth::Anonymous,
+        &oci_distribution::secrets::RegistryAuth::Anonymous,
     )
     .await
     .unwrap();
@@ -65,8 +98,42 @@ async fn pull_push_docker_reg() {
         image.config,
         reference,
         image.manifest,
-        auth,
+        &auth,
         ClientProtocol::Https,
+    )
+    .await
+    .unwrap();
+
+    debug!("{}", resp.manifest_url);
+}
+
+#[instrument]
+async fn pull_docker_reg_push_local() {
+    let user = env::var("DOCKER_USER").unwrap();
+    let password = env::var("DOCKER_PASSWORD").unwrap();
+    let auth =
+        oci_distribution::secrets::RegistryAuth::Basic(user.to_string(), password.to_string());
+
+    let image_ref = "alpine:latest".parse().unwrap();
+
+    info!("pulling image {image_ref}");
+    let image = registry_load_tester::client::pull_image(ClientProtocol::Https, image_ref, &auth)
+        .await
+        .unwrap();
+
+    debug!("got image {image:?}");
+
+    let reference: Reference = "localhost:6000/test/this:old".parse().unwrap();
+
+    info!("pushing image");
+
+    let resp: PushResponse = registry_load_tester::client::push_image(
+        image.layers,
+        image.config,
+        reference,
+        image.manifest,
+        &oci_distribution::secrets::RegistryAuth::Anonymous,
+        ClientProtocol::Http,
     )
     .await
     .unwrap();
@@ -82,7 +149,7 @@ async fn pull_push_local() {
     let image = registry_load_tester::client::pull_image(
         ClientProtocol::Http,
         image_ref,
-        oci_distribution::secrets::RegistryAuth::Anonymous,
+        &oci_distribution::secrets::RegistryAuth::Anonymous,
     )
     .await
     .unwrap();
@@ -98,7 +165,7 @@ async fn pull_push_local() {
         image.config,
         image_ref,
         image.manifest,
-        oci_distribution::secrets::RegistryAuth::Anonymous,
+        &oci_distribution::secrets::RegistryAuth::Anonymous,
         ClientProtocol::Https,
     )
     .await
@@ -116,7 +183,6 @@ async fn main() {
         .try_init()
         .unwrap();
 
-    push_fake().await;
-    // pull_push_docker_reg().await;
-    // pull_push_local().await;
+    // push_fake().await;
+    pull_docker_reg_push_docker_reg().await;
 }

@@ -14,7 +14,7 @@ use crate::image::Image;
 pub async fn pull_image(
     protocol: ClientProtocol,
     image: Reference,
-    auth: RegistryAuth,
+    auth: &RegistryAuth,
 ) -> Result<Image, OciDistributionError> {
     let mut client = oci_distribution::client::Client::new(ClientConfig {
         protocol,
@@ -22,16 +22,16 @@ pub async fn pull_image(
         ..ClientConfig::default()
     });
 
-    if auth != RegistryAuth::Anonymous {
+    if *auth != RegistryAuth::Anonymous {
         client
-            .auth(&image, &auth, oci_distribution::RegistryOperation::Pull)
+            .auth(&image, auth, oci_distribution::RegistryOperation::Pull)
             .await?;
     }
 
     let image = client
         .pull(
             &image,
-            &auth,
+            auth,
             vec![
                 oci_distribution::manifest::IMAGE_LAYER_MEDIA_TYPE,
                 oci_distribution::manifest::IMAGE_LAYER_GZIP_MEDIA_TYPE,
@@ -60,7 +60,7 @@ pub async fn push_image(
     config: ConfigFile,
     image: Reference,
     manifest: Option<OciImageManifest>,
-    auth: RegistryAuth,
+    auth: &RegistryAuth,
     protocol: ClientProtocol,
 ) -> Result<PushResponse, OciDistributionError> {
     let mut client = oci_distribution::client::Client::new(ClientConfig {
@@ -69,13 +69,13 @@ pub async fn push_image(
         ..ClientConfig::default()
     });
 
-    if auth != RegistryAuth::Anonymous {
+    if *auth != RegistryAuth::Anonymous {
         client
-            .auth(&image, &auth, oci_distribution::RegistryOperation::Push)
+            .auth(&image, auth, oci_distribution::RegistryOperation::Push)
             .await?;
     }
 
     let config = Config::oci_v1_from_config_file(config, None)?;
 
-    client.push(&image, &layers, config, &auth, manifest).await
+    client.push(&image, &layers, config, auth, manifest).await
 }
