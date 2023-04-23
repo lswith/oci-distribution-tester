@@ -1,18 +1,18 @@
-# Command-Line Help for `oci-distribution-tester`
+# Command-Line Help for `oci-tester`
 
-This document contains the help content for the `oci-distribution-tester` command-line program.
+This document contains the help content for the `oci-tester` command-line program.
 
 **Command Overview:**
 
-* [`oci-distribution-tester`↴](#oci-distribution-tester)
-* [`oci-distribution-tester push-images`↴](#oci-distribution-tester-push-images)
-* [`oci-distribution-tester pull-images`↴](#oci-distribution-tester-pull-images)
+* [`oci-tester`↴](#oci-tester)
+* [`oci-tester push-images`↴](#oci-tester-push-images)
+* [`oci-tester pull-images`↴](#oci-tester-pull-images)
 
-## `oci-distribution-tester`
+## `oci-tester`
 
 A tool for testing OCI distribution servers
 
-**Usage:** `oci-distribution-tester [OPTIONS] <COMMAND>`
+**Usage:** `oci-tester [OPTIONS] <COMMAND>`
 
 ###### **Subcommands:**
 
@@ -26,11 +26,11 @@ A tool for testing OCI distribution servers
 
 
 
-## `oci-distribution-tester push-images`
+## `oci-tester push-images`
 
 Pushes a generated OCI to a distribution server
 
-**Usage:** `oci-distribution-tester push-images [REGISTRY_URL] [COUNT] [REGISTRY_USERPASS]`
+**Usage:** `oci-tester push-images [REGISTRY_URL] [COUNT] [REGISTRY_USERPASS]`
 
 ###### **Arguments:**
 
@@ -44,11 +44,11 @@ Pushes a generated OCI to a distribution server
 
 
 
-## `oci-distribution-tester pull-images`
+## `oci-tester pull-images`
 
 Pulls OCIs from a distribution server
 
-**Usage:** `oci-distribution-tester pull-images [REGISTRY_URL] [COUNT] [REGISTRY_USERPASS] [IMAGE]`
+**Usage:** `oci-tester pull-images [REGISTRY_URL] [COUNT] [REGISTRY_USERPASS] [IMAGE]`
 
 ###### **Arguments:**
 

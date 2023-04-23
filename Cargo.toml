@@ -1,13 +1,13 @@
 [package]
-name = "oci-distribution-tester"
+name = "oci-tester"
 version = "0.1.0"
 edition = "2021"
 authors = [
   "Luke Swithenbank lswith@users.noreply.github.com"
 ]
 description = "A tool for testing OCI distribution servers"
-keywords = ["oci", "distribution", "registry", "test"]
-repository = "https://github.com/lswith/oci-distribution-tester"
+keywords = ["oci", "distribution", "registry", "test", "docker"]
+repository = "https://github.com/lswith/oci-tester"
 
 [badges]
 maintenance = {status = "actively-developed"}

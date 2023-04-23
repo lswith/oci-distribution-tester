@@ -88,11 +88,11 @@ async fn main() -> anyhow::Result<()> {
             count,
             reg_userpass,
             image,
-        } => oci_distribution_tester::pull_images(reg_url, count, reg_userpass, image).await,
+        } => oci_tester::pull_images(reg_url, count, reg_userpass, image).await,
         Commands::PushImages {
             reg_url,
             count,
             reg_userpass,
-        } => oci_distribution_tester::push_images(reg_url, count, reg_userpass).await,
+        } => oci_tester::push_images(reg_url, count, reg_userpass).await,
     }
 }

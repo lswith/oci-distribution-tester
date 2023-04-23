@@ -982,7 +982,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "oci-distribution-tester"
+name = "oci-tester"
 version = "0.1.0"
 dependencies = [
  "anyhow",
