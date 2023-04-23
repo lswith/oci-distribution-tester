@@ -21,7 +21,6 @@ A tool for testing OCI distribution servers
 
 ###### **Options:**
 
-* `--markdown-help`
 * `-v`, `--verbose`
 
 

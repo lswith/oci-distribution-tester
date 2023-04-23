@@ -13,15 +13,14 @@ struct Cli {
     #[command(subcommand)]
     command: Commands,
 
-    #[arg(long, hide = true)]
-    markdown_help: bool,
-
     #[arg(short, long, global = true)]
     verbose: bool,
 }
 
 #[derive(Debug, Subcommand)]
 enum Commands {
+    #[command(hide = true)]
+    MarkdownHelp,
     /// Pushes a generated OCI image to an OCI distribution server.
     #[command()]
     PushImages {
@@ -64,11 +63,6 @@ enum Commands {
 async fn main() -> anyhow::Result<()> {
     let args = Cli::parse();
 
-    if args.markdown_help {
-        clap_markdown::print_help_markdown::<Cli>();
-        return Ok(());
-    }
-
     let mut filter = EnvFilter::from_default_env().add_directive(LevelFilter::INFO.into());
     if args.verbose {
         filter = EnvFilter::from_default_env().add_directive(LevelFilter::DEBUG.into());
@@ -83,6 +77,10 @@ async fn main() -> anyhow::Result<()> {
         })?;
 
     match args.command {
+        Commands::MarkdownHelp => {
+            clap_markdown::print_help_markdown::<Cli>();
+            Ok(())
+        }
         Commands::PullImages {
             reg_url,
             count,
