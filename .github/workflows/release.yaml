@@ -1,0 +1,13 @@
+name: release
+on:
+  push:
+    tags:
+      - "v*"
+jobs:
+  publish:
+    name: publish to crates.io
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: publish oci-tester to crates.io
+        run: cargo publish --token ${{ secrets.CRATES_IO_TOKEN }}
