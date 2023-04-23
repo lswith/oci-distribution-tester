@@ -22,10 +22,10 @@ struct Cli {
 
 #[derive(Debug, Subcommand)]
 enum Commands {
-    /// Pushes a generated OCI to a distribution server.
+    /// Pushes a generated OCI image to an OCI distribution server.
     #[command()]
     PushImages {
-        /// The distribution server url.
+        /// The OCI distribution server url.
         #[arg(value_name = "REGISTRY_URL", default_value = "http://localhost:6000")]
         reg_url: String,
 
@@ -33,15 +33,15 @@ enum Commands {
         #[arg(value_name = "COUNT", default_value_t = 1)]
         count: usize,
 
-        /// The user+password to authenticate against the distribution server in the format user:password.
+        /// The user+password to authenticate against the OCI distribution server in the format user:password.
         #[arg(value_name = "REGISTRY_USERPASS")]
         reg_userpass: Option<String>,
     },
 
-    /// Pulls OCIs from a distribution server.
+    /// Pulls OCI images from an OCI distribution server.
     #[command()]
     PullImages {
-        /// The distribution server url.
+        /// The OCI distribution server url.
         #[arg(value_name = "REGISTRY_URL", default_value = "https://index.docker.io")]
         reg_url: String,
 
@@ -49,7 +49,7 @@ enum Commands {
         #[arg(value_name = "COUNT", default_value_t = 1)]
         count: usize,
 
-        /// The user+password to authenticate against the distribution server in the format user:password.
+        /// The user+password to authenticate against the OCI distribution server in the format user:password.
         #[arg(value_name = "REGISTRY_USERPASS")]
         reg_userpass: Option<String>,
 

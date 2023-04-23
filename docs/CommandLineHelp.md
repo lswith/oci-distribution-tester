@@ -16,8 +16,8 @@ A tool for testing OCI distribution servers
 
 ###### **Subcommands:**
 
-* `push-images` — Pushes a generated OCI to a distribution server
-* `pull-images` — Pulls OCIs from a distribution server
+* `push-images` — Pushes a generated OCI image to an OCI distribution server
+* `pull-images` — Pulls OCI images from an OCI distribution server
 
 ###### **Options:**
 
@@ -28,37 +28,37 @@ A tool for testing OCI distribution servers
 
 ## `oci-tester push-images`
 
-Pushes a generated OCI to a distribution server
+Pushes a generated OCI image to an OCI distribution server
 
 **Usage:** `oci-tester push-images [REGISTRY_URL] [COUNT] [REGISTRY_USERPASS]`
 
 ###### **Arguments:**
 
-* `<REGISTRY_URL>` — The distribution server url
+* `<REGISTRY_URL>` — The OCI distribution server url
 
   Default value: `http://localhost:6000`
 * `<COUNT>` — The amount of images to push
 
   Default value: `1`
-* `<REGISTRY_USERPASS>` — The user+password to authenticate against the distribution server in the format user:password
+* `<REGISTRY_USERPASS>` — The user+password to authenticate against the OCI distribution server in the format user:password
 
 
 
 ## `oci-tester pull-images`
 
-Pulls OCIs from a distribution server
+Pulls OCI images from an OCI distribution server
 
 **Usage:** `oci-tester pull-images [REGISTRY_URL] [COUNT] [REGISTRY_USERPASS] [IMAGE]`
 
 ###### **Arguments:**
 
-* `<REGISTRY_URL>` — The distribution server url
+* `<REGISTRY_URL>` — The OCI distribution server url
 
   Default value: `https://index.docker.io`
 * `<COUNT>` — The amount of images to pull
 
   Default value: `1`
-* `<REGISTRY_USERPASS>` — The user+password to authenticate against the distribution server in the format user:password
+* `<REGISTRY_USERPASS>` — The user+password to authenticate against the OCI distribution server in the format user:password
 * `<IMAGE>` — The image to pull
 
   Default value: `alpine:latest`
