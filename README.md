@@ -1,10 +1,29 @@
-# OCI Distribution Tester
+# OCI Tester
 
-oci-distribution-tester is a tool for testing that an OCI Distribution Server (a docker registry) works to the OCI spec.
+oci-tester is a command-line tool for testing the functionality
+of an OCI Distribution Server, which is essentially a Docker registry
+that conforms to the OCI spec. The tool supports both pushing and pulling
+images to and from a configured distribution server, and can be useful for
+verifying that your registry is working correctly.
 
-Main features:
+## Installation
 
-- push images to a configured distribution server
-- pull images from a configured distribution server
+You can install oci-distribution-tester using `cargo`:
 
-[oci-tester.md](./docs/CommandLineHelp.md)
+```
+cargo install oci-tester
+```
+
+You can also download your required binary from the releases section:
+
+TODO!()
+
+## Usage
+
+TODO!()
+
+For more detailed information on the available subcommands and their options, see [oci-tester.md](./docs/CommandLineHelp.md).
+
+## License
+
+This tool is licensed under the [MIT License](./LICENSE).
