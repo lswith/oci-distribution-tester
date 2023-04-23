@@ -8,15 +8,9 @@ verifying that your registry is working correctly.
 
 ## Installation
 
-You can install oci-distribution-tester using `cargo`:
-
-```
-cargo install oci-tester
-```
-
 You can also download your required binary from the releases section:
 
-TODO!()
+[Releases](https://github.com/lswith/oci-tester/releases).
 
 ## Usage
 
