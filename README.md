@@ -6,3 +6,5 @@ Main features:
 
 - push images to a configured distribution server
 - pull images from a configured distribution server
+
+[oci-tester.md](./docs/CommandLineHelp.md)
