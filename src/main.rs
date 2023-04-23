@@ -82,7 +82,7 @@ async fn main() {
                 registry_url = registry_url,
                 "Starting load test"
             );
-            let results = oci_distribution_tester::load_test(count, reg, auth, protocol).await;
+            let results = oci_distribution_tester::load_test_push(count, reg, auth, protocol).await;
 
             let total = results.len();
             let success = results

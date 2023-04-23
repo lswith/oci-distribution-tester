@@ -13,7 +13,7 @@ use crate::image::Image;
 pub async fn pull_image(
     protocol: ClientProtocol,
     image: Reference,
-    auth: &RegistryAuth,
+    auth: RegistryAuth,
 ) -> Result<Image, OciDistributionError> {
     let mut client = oci_distribution::client::Client::new(ClientConfig {
         protocol,
@@ -21,16 +21,16 @@ pub async fn pull_image(
         ..ClientConfig::default()
     });
 
-    if *auth != RegistryAuth::Anonymous {
+    if auth != RegistryAuth::Anonymous {
         client
-            .auth(&image, auth, oci_distribution::RegistryOperation::Pull)
+            .auth(&image, &auth, oci_distribution::RegistryOperation::Pull)
             .await?;
     }
 
     let image = client
         .pull(
             &image,
-            auth,
+            &auth,
             vec![
                 oci_distribution::manifest::IMAGE_LAYER_MEDIA_TYPE,
                 oci_distribution::manifest::IMAGE_LAYER_GZIP_MEDIA_TYPE,

@@ -27,7 +27,7 @@ impl Display for LoadTestError {
 
 /// Load tests a registry by pushing images to it.
 #[instrument(skip(auth, protocol), level = "debug")]
-pub async fn load_test(
+pub async fn load_test_push(
     image_count: usize,
     host: String,
     auth: RegistryAuth,
@@ -81,6 +81,47 @@ async fn push_reg_image(
     Ok(res)
 }
 
+/// Load tests a registry by pulling an image from it.
+#[instrument(skip(auth, protocol), level = "debug")]
+pub async fn load_test_pull(
+    image_count: usize,
+    image: Reference,
+    auth: RegistryAuth,
+    protocol: ClientProtocol,
+) -> Vec<Result<(), LoadTestError>> {
+    let mut handles = Vec::new();
+
+    for _ in 0..image_count {
+        debug!("Kicking off pull for image {image}");
+        let h = tokio::task::spawn(pull_reg_image(
+            image.clone(),
+            auth.clone(),
+            protocol.clone(),
+        ));
+        handles.push(h);
+    }
+    debug!("Waiting for all pulls to complete");
+    let results = future::join_all(handles).await;
+    let results: Vec<Result<(), LoadTestError>> = results
+        .into_iter()
+        .map(|r| {
+            r.map_err(LoadTestError::JoinError)
+                .and_then(|r| r.map_err(LoadTestError::OciDistributionError))
+        })
+        .collect();
+    results
+}
+
+#[instrument(level = "debug", skip(auth, protocol))]
+async fn pull_reg_image(
+    image: Reference,
+    auth: RegistryAuth,
+    protocol: ClientProtocol,
+) -> Result<(), OciDistributionError> {
+    crate::client::pull_image(protocol, image, auth).await?;
+    Ok(())
+}
+
 #[instrument]
 async fn pull_docker_reg_push_docker_reg() {
     let user = env::var("DOCKER_USER").unwrap();
@@ -91,7 +132,7 @@ async fn pull_docker_reg_push_docker_reg() {
     let image_ref = "alpine:latest".parse().unwrap();
 
     info!("pulling image {image_ref}");
-    let image = crate::client::pull_image(ClientProtocol::Https, image_ref, &auth)
+    let image = crate::client::pull_image(ClientProtocol::Https, image_ref, auth.clone())
         .await
         .unwrap();
 
@@ -125,7 +166,7 @@ async fn pull_local_push_docker_reg() {
     let image = crate::client::pull_image(
         ClientProtocol::Http,
         image_ref,
-        &oci_distribution::secrets::RegistryAuth::Anonymous,
+        oci_distribution::secrets::RegistryAuth::Anonymous,
     )
     .await
     .unwrap();
@@ -167,7 +208,7 @@ async fn pull_docker_reg_push_local() {
     let image_ref = "alpine:latest".parse().unwrap();
 
     info!("pulling image {image_ref}");
-    let image = crate::client::pull_image(ClientProtocol::Https, image_ref, &auth)
+    let image = crate::client::pull_image(ClientProtocol::Https, image_ref, auth)
         .await
         .unwrap();
 
@@ -202,7 +243,7 @@ async fn pull_local_push_local() {
     let image = crate::client::pull_image(
         ClientProtocol::Http,
         image_ref,
-        &oci_distribution::secrets::RegistryAuth::Anonymous,
+        oci_distribution::secrets::RegistryAuth::Anonymous,
     )
     .await
     .unwrap();

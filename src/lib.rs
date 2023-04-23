@@ -4,4 +4,4 @@ mod fake;
 mod image;
 mod tester;
 
-pub use tester::load_test;
+pub use tester::{load_test_pull, load_test_push};
