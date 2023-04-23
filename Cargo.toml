@@ -13,6 +13,7 @@ repository = "https://github.com/lswith/oci-distribution-tester"
 maintenance = {status = "actively-developed"}
 
 [dependencies]
+anyhow = "1.0.70"
 clap = { version = "4.2.4", features = ["cargo"] }
 flate2 = "1.0.25"
 futures = "0.3.28"
