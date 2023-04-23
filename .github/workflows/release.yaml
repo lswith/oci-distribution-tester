@@ -30,8 +30,9 @@ jobs:
             archive: tar.gz tar.xz tar.zst
           - target: x86_64-apple-darwin
             archive: tar.gz zip
-          - target: aarch64-apple-darwin
-            archive: tar.gz zip
+          # unsupported at the moment
+          # - target: aarch64-apple-darwin
+          # archive: tar.gz zip
     steps:
       - uses: actions/checkout@master
       - name: Compile and release
