@@ -4,32 +4,39 @@ use oci_distribution::{
     errors::OciDistributionError,
 };
 use rand::{distributions::Alphanumeric, Rng, RngCore};
-use std::{
-    io::Write,
-    ops::Deref,
-    path::{Path, PathBuf},
-};
+use std::{io::Write, path::PathBuf};
 use tar::{Builder, Header};
 
 use crate::image::Image;
 
 pub const MEGABYTE: usize = 1024 * 1024;
 
-pub fn gen_tar_image_layer(size: usize) -> oci_distribution::client::ImageLayer {
+pub fn gen_tar_file(size: usize) -> Vec<u8> {
     let filename = gen_file_name(10);
     let filepath = gen_file_path(3);
     let data = gen_file_data(size);
-    let tar_data = TarData::new(&filename, &filepath, data);
-    oci_distribution::client::ImageLayer::oci_v1(tar_data.to_vec(), None)
+    let mut header = Header::new_gnu();
+    header.set_size(data.len() as u64);
+    header.set_cksum();
+
+    let mut ar = Builder::new(Vec::new());
+
+    let p = filepath.join(filename);
+
+    ar.append_data(&mut header, &p, &*data).unwrap();
+    ar.into_inner().unwrap()
+}
+
+pub fn gen_tar_image_layer(size: usize) -> oci_distribution::client::ImageLayer {
+    let tar_data = gen_tar_file(size);
+
+    oci_distribution::client::ImageLayer::oci_v1(tar_data, None)
 }
 
 pub fn gen_gzip_tar_image_layer(size: usize) -> oci_distribution::client::ImageLayer {
-    let filename = gen_file_name(10);
-    let filepath = gen_file_path(3);
-    let data = gen_file_data(size);
-    let tar_data = TarData::new(&filename, &filepath, data);
+    let tar_data = gen_tar_file(size);
     let mut gz_data = flate2::write::GzEncoder::new(Vec::new(), flate2::Compression::default());
-    gz_data.write_all(&tar_data.to_vec()).unwrap();
+    gz_data.write_all(&tar_data).unwrap();
     let gz_data = gz_data.finish().unwrap();
     oci_distribution::client::ImageLayer::oci_v1_gzip(gz_data, None)
 }
@@ -90,26 +97,4 @@ pub fn gen_file_path(segments: usize) -> PathBuf {
         path.push(gen_file_name(10));
     }
     path
-}
-
-pub struct TarData(Vec<u8>);
-
-impl TarData {
-    pub fn new(filename: &str, tarpath: &Path, data: Vec<u8>) -> TarData {
-        let mut header = Header::new_gnu();
-        header.set_size(data.len() as u64);
-        header.set_cksum();
-
-        let mut ar = Builder::new(Vec::new());
-
-        let p = tarpath.join(filename);
-
-        ar.append_data(&mut header, &p, data.deref()).unwrap();
-
-        Self(ar.into_inner().unwrap())
-    }
-
-    pub fn to_vec(self) -> Vec<u8> {
-        self.0
-    }
 }

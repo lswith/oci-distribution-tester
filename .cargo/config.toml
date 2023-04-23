@@ -1,0 +1,5 @@
+[build]
+rustflags = ["-Dclippy::pedantic", "-Dwarnings", "-Dmissing_docs"]
+
+[registries.crates-io]
+protocol = "sparse"
