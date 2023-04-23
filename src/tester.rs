@@ -26,7 +26,7 @@ impl Display for LoadTestError {
 }
 
 /// Load tests a registry by pushing images to it.
-#[instrument(skip(auth, protocol))]
+#[instrument(skip(auth, protocol), level = "debug")]
 pub async fn load_test(
     image_count: usize,
     host: String,
@@ -36,7 +36,7 @@ pub async fn load_test(
     let mut handles = Vec::new();
 
     for i in 0..image_count {
-        info!("Kicking off push for image {i}");
+        debug!("Kicking off push for image {i}");
         let h = tokio::task::spawn(push_reg_image(
             i,
             host.clone(),
@@ -45,7 +45,7 @@ pub async fn load_test(
         ));
         handles.push(h);
     }
-    info!("Waiting for all pushes to complete");
+    debug!("Waiting for all pushes to complete");
     let results = future::join_all(handles).await;
     let results: Vec<Result<PushResponse, LoadTestError>> = results
         .into_iter()
