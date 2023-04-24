@@ -898,6 +898,7 @@ dependencies = [
 [[package]]
 name = "oci-distribution"
 version = "0.10.0"
+source = "git+https://github.com/lswith/oci-distribution.git?branch=next#42f626af099b9e7c2ade4eb804a5038eddc069f3"
 dependencies = [
  "chrono",
  "futures",
