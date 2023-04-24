@@ -70,7 +70,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
       - name: Install openssl
-        run: sudo apt install -y libssl-dev
+        run: sudo apt install -y libssl-dev openssl pkg-config
         if: matrix.platform.os == 'ubuntu-latest'
       - name: Build binary
         uses: houseabsolute/actions-rust-cross@v0
