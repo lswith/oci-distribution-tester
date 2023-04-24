@@ -25,49 +25,61 @@ enum Commands {
     #[command()]
     PushImages {
         /// The OCI distribution server url.
-        #[arg(value_name = "REGISTRY_URL", default_value = "http://localhost:6000")]
+        #[arg(
+            long,
+            value_name = "REGISTRY_URL",
+            default_value = "http://localhost:6000"
+        )]
         reg_url: String,
 
-        /// The amount of images to push.
-        #[arg(value_name = "COUNT", default_value_t = 1)]
-        count: usize,
-
         /// The user+password to authenticate against the OCI distribution server in the format user:password.
-        #[arg(value_name = "REGISTRY_USERPASS")]
+        #[arg(long, value_name = "REGISTRY_USERPASS")]
         reg_userpass: Option<String>,
+
+        /// The amount of images to push.
+        #[arg(short, long, value_name = "COUNT", default_value_t = 1)]
+        count: usize,
     },
 
     /// Pulls OCI images from an OCI distribution server.
     #[command()]
     PullImages {
         /// The OCI distribution server url.
-        #[arg(value_name = "REGISTRY_URL", default_value = "https://index.docker.io")]
+        #[arg(
+            long,
+            value_name = "REGISTRY_URL",
+            default_value = "https://index.docker.io"
+        )]
         reg_url: String,
 
-        /// The amount of images to pull.
-        #[arg(value_name = "COUNT", default_value_t = 1)]
-        count: usize,
-
         /// The user+password to authenticate against the OCI distribution server in the format user:password.
-        #[arg(value_name = "REGISTRY_USERPASS")]
+        #[arg(long, value_name = "REGISTRY_USERPASS")]
         reg_userpass: Option<String>,
 
         /// The image to pull.
-        #[arg(value_name = "IMAGE", default_value = "alpine:latest")]
+        #[arg(short, long, value_name = "IMAGE", default_value = "alpine:latest")]
         image: String,
+
+        /// The amount of images to pull.
+        #[arg(short, long, value_name = "COUNT", default_value_t = 1)]
+        count: usize,
     },
 
     PushImageList {
         /// The OCI distribution server url.
-        #[arg(value_name = "REGISTRY_URL", default_value = "http://localhost:6000")]
+        #[arg(
+            long,
+            value_name = "REGISTRY_URL",
+            default_value = "http://localhost:6000"
+        )]
         reg_url: String,
 
         /// The user+password to authenticate against the OCI distribution server in the format user:password.
-        #[arg(value_name = "REGISTRY_USERPASS")]
+        #[arg(long, value_name = "REGISTRY_USERPASS")]
         reg_userpass: Option<String>,
 
         /// Where to push the image list.
-        #[arg(value_name = "IMAGE", default_value = "test/this:cache")]
+        #[arg(short, long, value_name = "IMAGE", default_value = "test/this:cache")]
         image: String,
     },
 }
