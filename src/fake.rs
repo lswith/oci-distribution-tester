@@ -2,6 +2,9 @@ use oci_distribution::{
     client::ImageLayer,
     config::{Architecture, ConfigFile, Os},
     errors::OciDistributionError,
+    manifest::{
+        ImageIndexEntry, OciImageIndex, Platform, OCI_IMAGE_INDEX_MEDIA_TYPE, OCI_IMAGE_MEDIA_TYPE,
+    },
 };
 use rand::{distributions::Alphanumeric, Rng, RngCore};
 use std::{io::Write, path::PathBuf};
@@ -97,4 +100,27 @@ pub fn gen_file_path(segments: usize) -> PathBuf {
         path.push(gen_file_name(10));
     }
     path
+}
+
+pub fn gen_oci_image_index() -> OciImageIndex {
+    OciImageIndex {
+        schema_version: 2,
+        media_type: Some(OCI_IMAGE_INDEX_MEDIA_TYPE.to_string()),
+        manifests: vec![ImageIndexEntry {
+            digest: "sha256:e692418e4cbaf90ca69d05a66403747baa33ee08806650b51fab815ad7fc331f"
+                .to_string(),
+            media_type: OCI_IMAGE_MEDIA_TYPE.to_string(),
+            size: 7143,
+            platform: Some(Platform {
+                architecture: "ppc64le".to_string(),
+                os: "linux".to_string(),
+                os_version: None,
+                os_features: None,
+                variant: None,
+                features: None,
+            }),
+            annotations: None,
+        }],
+        annotations: None,
+    }
 }

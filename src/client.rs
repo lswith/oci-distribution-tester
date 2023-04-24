@@ -1,7 +1,7 @@
 use oci_distribution::{
     client::{ClientConfig, ClientProtocol, Config, ImageLayer, PushResponse},
     errors::OciDistributionError,
-    manifest::OciImageManifest,
+    manifest::{OciImageIndex, OciImageManifest},
     secrets::RegistryAuth,
     Reference,
 };
@@ -70,4 +70,26 @@ pub async fn push_image(
     }
 
     client.push(&image, layers, config, auth, manifest).await
+}
+
+#[instrument(level = "trace", err)]
+pub async fn push_image_list(
+    reference: Reference,
+    manifest: OciImageIndex,
+    auth: &RegistryAuth,
+    protocol: ClientProtocol,
+) -> Result<String, OciDistributionError> {
+    let mut client = oci_distribution::client::Client::new(ClientConfig {
+        protocol,
+        platform_resolver: Some(Box::new(oci_distribution::client::linux_amd64_resolver)),
+        ..ClientConfig::default()
+    });
+
+    if *auth != RegistryAuth::Anonymous {
+        client
+            .auth(&reference, auth, oci_distribution::RegistryOperation::Push)
+            .await?;
+    }
+
+    client.push_manifest_list(&reference, auth, manifest).await
 }

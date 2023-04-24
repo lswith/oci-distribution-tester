@@ -121,3 +121,34 @@ pub async fn push_images(
     );
     Ok(())
 }
+/// Pushes an image index to a registry.
+///
+/// # Errors
+/// * If the registry URL is not valid
+/// * If the image is not valid
+pub async fn push_image_index(
+    reg_url: String,
+    reg_userpass: Option<String>,
+    image: String,
+) -> Result<()> {
+    let (reg, protocol) = parse_reg(&reg_url).context("couldn't parse the reg url: {reg_url}")?;
+
+    let mut auth = RegistryAuth::Anonymous;
+    if let Some(userpass) = reg_userpass {
+        let (user, password) = parse_userpass(&userpass);
+        auth = RegistryAuth::Basic(user, password);
+    }
+
+    info!(registry_url = reg_url, "Pushing image list");
+
+    let reference: Reference = format!("{reg}/{image}")
+        .parse()
+        .context("couldn't create a reference from {reg}/{image}")?;
+    match crate::tester::push_image_index(reference, auth, protocol).await {
+        Ok(_) => Ok(()),
+        Err(e) => {
+            error!("{e}");
+            Ok(())
+        }
+    }
+}
