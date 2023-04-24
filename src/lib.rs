@@ -5,4 +5,4 @@ mod fake;
 mod image;
 mod tester;
 
-pub use cli::{pull_images, push_images};
+pub use cli::{pull_images, push_image_index, push_images};

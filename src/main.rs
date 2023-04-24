@@ -56,6 +56,20 @@ enum Commands {
         #[arg(value_name = "IMAGE", default_value = "alpine:latest")]
         image: String,
     },
+
+    PushImageList {
+        /// The OCI distribution server url.
+        #[arg(value_name = "REGISTRY_URL", default_value = "http://localhost:6000")]
+        reg_url: String,
+
+        /// The user+password to authenticate against the OCI distribution server in the format user:password.
+        #[arg(value_name = "REGISTRY_USERPASS")]
+        reg_userpass: Option<String>,
+
+        /// Where to push the image list.
+        #[arg(value_name = "IMAGE", default_value = "test/this:cache")]
+        image: String,
+    },
 }
 
 #[tokio::main]
@@ -92,5 +106,10 @@ async fn main() -> anyhow::Result<()> {
             count,
             reg_userpass,
         } => oci_tester::push_images(reg_url, count, reg_userpass).await,
+        Commands::PushImageList {
+            reg_url,
+            reg_userpass,
+            image,
+        } => oci_tester::push_image_index(reg_url, reg_userpass, image).await,
     }
 }

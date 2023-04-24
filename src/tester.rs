@@ -1,4 +1,4 @@
-use std::{env, fmt::Display};
+use std::fmt::Display;
 
 use futures::future;
 use oci_distribution::{
@@ -7,9 +7,12 @@ use oci_distribution::{
     secrets::RegistryAuth,
     Reference,
 };
-use tracing::{debug, info, instrument};
+use tracing::{debug, instrument};
 
-use crate::fake::MEGABYTE;
+use crate::{
+    client,
+    fake::{self, MEGABYTE},
+};
 
 pub enum LoadTestError {
     OciDistributionError(OciDistributionError),
@@ -122,150 +125,11 @@ async fn pull_reg_image(
     Ok(())
 }
 
-#[instrument]
-async fn pull_docker_reg_push_docker_reg() {
-    let user = env::var("DOCKER_USER").unwrap();
-    let password = env::var("DOCKER_PASSWORD").unwrap();
-    let auth =
-        oci_distribution::secrets::RegistryAuth::Basic(user.to_string(), password.to_string());
-
-    let image_ref = "alpine:latest".parse().unwrap();
-
-    info!("pulling image {image_ref}");
-    let image = crate::client::pull_image(ClientProtocol::Https, image_ref, auth.clone())
-        .await
-        .unwrap();
-
-    debug!("got image {image:?}");
-
-    let reference: Reference = "lswith/alpine:latest".parse().unwrap();
-
-    let mut manifest = image.manifest.unwrap();
-    manifest.media_type = Some(oci_distribution::manifest::OCI_IMAGE_MEDIA_TYPE.to_string());
-
-    info!("pushing image");
-
-    let resp: PushResponse = crate::client::push_image(
-        image.layers,
-        image.config,
-        reference,
-        Some(manifest),
-        &auth,
-        ClientProtocol::Https,
-    )
-    .await
-    .unwrap();
-
-    debug!("{}", resp.manifest_url);
-}
-#[instrument]
-async fn pull_local_push_docker_reg() {
-    let image_ref = "localhost:6000/test/this:old".parse().unwrap();
-
-    info!("pulling image {image_ref}");
-    let image = crate::client::pull_image(
-        ClientProtocol::Http,
-        image_ref,
-        oci_distribution::secrets::RegistryAuth::Anonymous,
-    )
-    .await
-    .unwrap();
-
-    debug!("got image {image:?}");
-
-    let reference: Reference = "lswith/test:latest".parse().unwrap();
-
-    let user = env::var("DOCKER_USER").unwrap();
-    let password = env::var("DOCKER_PASSWORD").unwrap();
-    let auth =
-        oci_distribution::secrets::RegistryAuth::Basic(user.to_string(), password.to_string());
-
-    info!("pushing image");
-    let mut manifest = image.manifest.unwrap();
-    manifest.media_type = Some(oci_distribution::manifest::OCI_IMAGE_MEDIA_TYPE.to_string());
-
-    let resp: PushResponse = crate::client::push_image(
-        image.layers,
-        image.config,
-        reference,
-        Some(manifest),
-        &auth,
-        ClientProtocol::Https,
-    )
-    .await
-    .unwrap();
-
-    debug!("{}", resp.manifest_url);
-}
-
-#[instrument]
-async fn pull_docker_reg_push_local() {
-    let user = env::var("DOCKER_USER").unwrap();
-    let password = env::var("DOCKER_PASSWORD").unwrap();
-    let auth =
-        oci_distribution::secrets::RegistryAuth::Basic(user.to_string(), password.to_string());
-
-    let image_ref = "alpine:latest".parse().unwrap();
-
-    info!("pulling image {image_ref}");
-    let image = crate::client::pull_image(ClientProtocol::Https, image_ref, auth)
-        .await
-        .unwrap();
-
-    debug!("got image {image:?}");
-
-    let reference: Reference = "localhost:6000/test/this:old".parse().unwrap();
-
-    let mut manifest = image.manifest.unwrap();
-    manifest.media_type = Some(oci_distribution::manifest::OCI_IMAGE_MEDIA_TYPE.to_string());
-
-    info!("pushing image");
-
-    let resp: PushResponse = crate::client::push_image(
-        image.layers,
-        image.config,
-        reference,
-        Some(manifest),
-        &oci_distribution::secrets::RegistryAuth::Anonymous,
-        ClientProtocol::Http,
-    )
-    .await
-    .unwrap();
-
-    debug!("{}", resp.manifest_url);
-}
-
-#[instrument]
-async fn pull_local_push_local() {
-    let image_ref = "localhost:6000/test/this:old".parse().unwrap();
-
-    info!("pulling image {image_ref}");
-    let image = crate::client::pull_image(
-        ClientProtocol::Http,
-        image_ref,
-        oci_distribution::secrets::RegistryAuth::Anonymous,
-    )
-    .await
-    .unwrap();
-
-    debug!("got image {image:?}");
-
-    let image_ref = "localhost:6000/test/this:new".parse().unwrap();
-
-    info!("pushing image");
-    let mut manifest = image.manifest.unwrap();
-    manifest.media_type = Some(oci_distribution::manifest::OCI_IMAGE_MEDIA_TYPE.to_string());
-
-    let resp: PushResponse = crate::client::push_image(
-        image.layers,
-        image.config,
-        image_ref,
-        Some(manifest),
-        &oci_distribution::secrets::RegistryAuth::Anonymous,
-        ClientProtocol::Http,
-    )
-    .await
-    .unwrap();
-
-    debug!("{}", resp.manifest_url);
+pub async fn push_image_index(
+    image: Reference,
+    auth: RegistryAuth,
+    protocol: ClientProtocol,
+) -> Result<String, OciDistributionError> {
+    let index = fake::gen_oci_image_index();
+    client::push_image_list(image, index, &auth, protocol).await
 }
