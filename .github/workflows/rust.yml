@@ -9,8 +9,8 @@ on:
 
 env:
   CARGO_TERM_COLOR: always
-  PKG_CONFIG_SYSROOT_DIR: /
-  OPENSSL_INCLUDE_DIR: /usr/include/openssl
+  # PKG_CONFIG_SYSROOT_DIR: /
+  # OPENSSL_INCLUDE_DIR: /usr/include/openssl
 
 jobs:
   build:
