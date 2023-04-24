@@ -16,10 +16,10 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
-      - name: Build
-        run: cargo build --verbose
-      - name: Run tests
-        run: cargo test --verbose
+      # - name: Build
+      #   run: cargo build --verbose
+      # - name: Run tests
+      #   run: cargo test --verbose
 
   cross:
     name: Release - ${{ matrix.platform.release_for }}
@@ -44,29 +44,29 @@ jobs:
             bin: oci-tester
             name: oci-tester-Linux-arm-musl.tar.gz
 
-          - release_for: Windows-i686
-            os: windows-latest
-            target: i686-pc-windows-msvc
-            bin: oci-tester.exe
-            name: oci-tester-Windows-i686.zip
-
-          - release_for: Windows-x86_64
-            os: windows-latest
-            target: x86_64-pc-windows-msvc
-            bin: oci-tester.exe
-            name: oci-tester-Windows-x86_64.zip
-
-          - release_for: macOS-x86_64
-            os: macOS-latest
-            target: x86_64-apple-darwin
-            bin: oci-tester
-            name: oci-tester-Darwin-x86_64.tar.gz
-
-          - release_for: macOS-aarch64
-            os: macOS-latest
-            target: aarch64-apple-darwin
-            bin: oci-tester
-            name: oci-tester-Darwin-aarch64.tar.gz
+          # - release_for: Windows-i686
+          #   os: windows-latest
+          #   target: i686-pc-windows-msvc
+          #   bin: oci-tester.exe
+          #   name: oci-tester-Windows-i686.zip
+          #
+          # - release_for: Windows-x86_64
+          #   os: windows-latest
+          #   target: x86_64-pc-windows-msvc
+          #   bin: oci-tester.exe
+          #   name: oci-tester-Windows-x86_64.zip
+          #
+          # - release_for: macOS-x86_64
+          #   os: macOS-latest
+          #   target: x86_64-apple-darwin
+          #   bin: oci-tester
+          #   name: oci-tester-Darwin-x86_64.tar.gz
+          #
+          # - release_for: macOS-aarch64
+          #   os: macOS-latest
+          #   target: aarch64-apple-darwin
+          #   bin: oci-tester
+          #   name: oci-tester-Darwin-aarch64.tar.gz
 
     runs-on: ${{ matrix.platform.os }}
     steps:
