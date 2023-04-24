@@ -1,4 +1,4 @@
-name: release
+# name: release
 # on:
 #   push:
 #     tags:
@@ -12,86 +12,86 @@ name: release
 #       # - name: publish oci-tester to crates.io
 #       #   run: cargo publish --token ${{ secrets.CRATES_IO_TOKEN }}
 
-on:
-  push
-  # release:
-  #   types: [created]
+# on:
+# push
+# release:
+#   types: [created]
 
-jobs:
-  release:
-    name: Release - ${{ matrix.platform.release_for }}
-    strategy:
-      matrix:
-        platform:
-          - release_for: Linux-x86_64
-            os: ubuntu-latest
-            target: x86_64-unknown-linux-musl
-            bin: oci-tester
-            name: oci-tester-Linux-x86_64-musl.tar.gz
-
-          - release_for: Linux-aarch64
-            os: ubuntu-latest
-            target: aarch64-unknown-linux-musl
-            bin: oci-tester
-            name: oci-tester-Linux-aarch64-musl.tar.gz
-
-          - release_for: Linux-arm
-            os: ubuntu-latest
-            target: arm-unknown-linux-musleabi
-            bin: oci-tester
-            name: oci-tester-Linux-arm-musl.tar.gz
-
-          - release_for: Windows-i686
-            os: windows-latest
-            target: i686-pc-windows-msvc
-            bin: oci-tester.exe
-            name: oci-tester-Windows-i686.zip
-
-          - release_for: Windows-x86_64
-            os: windows-latest
-            target: x86_64-pc-windows-msvc
-            bin: oci-tester.exe
-            name: oci-tester-Windows-x86_64.zip
-
-          - release_for: macOS-x86_64
-            os: macOS-latest
-            target: x86_64-apple-darwin
-            bin: oci-tester
-            name: oci-tester-Darwin-x86_64.tar.gz
-
-          - release_for: macOS-aarch64
-            os: macOS-latest
-            target: aarch64-apple-darwin
-            bin: oci-tester
-            name: oci-tester-Darwin-aarch64.tar.gz
-
-    runs-on: ${{ matrix.platform.os }}
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-      - name: Build binary
-        uses: houseabsolute/actions-rust-cross@v0
-        with:
-          target: ${{ matrix.platform.target }}
-          args: "--locked --release"
-          strip: true
-      - name: Package as archive
-        shell: bash
-        run: |
-          cd target/${{ matrix.platform.target }}/release
-          if [[ "${{ matrix.platform.os }}" == "windows-latest" ]]; then
-            7z a ../../../${{ matrix.platform.name }} ${{ matrix.platform.bin }}
-          else
-            tar czvf ../../../${{ matrix.platform.name }} ${{ matrix.platform.bin }}
-          fi
-          cd -
-      - name: Generate SHA-256
-        if: matrix.platform.os == 'macOS-latest'
-        run: shasum -a 256 ${{ matrix.platform.name }}
-      # - name: Publish GitHub release
-      #   uses: softprops/action-gh-release@v1
-      #   with:
-      #     files: "oci-tester-*"
-      #   env:
-      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      #   if: startsWith( github.ref, 'refs/tags/v' )
+# jobs:
+#   release:
+#     name: Release - ${{ matrix.platform.release_for }}
+#     strategy:
+#       matrix:
+#         platform:
+#           - release_for: Linux-x86_64
+#             os: ubuntu-latest
+#             target: x86_64-unknown-linux-musl
+#             bin: oci-tester
+#             name: oci-tester-Linux-x86_64-musl.tar.gz
+#
+#           - release_for: Linux-aarch64
+#             os: ubuntu-latest
+#             target: aarch64-unknown-linux-musl
+#             bin: oci-tester
+#             name: oci-tester-Linux-aarch64-musl.tar.gz
+#
+#           - release_for: Linux-arm
+#             os: ubuntu-latest
+#             target: arm-unknown-linux-musleabi
+#             bin: oci-tester
+#             name: oci-tester-Linux-arm-musl.tar.gz
+#
+#           - release_for: Windows-i686
+#             os: windows-latest
+#             target: i686-pc-windows-msvc
+#             bin: oci-tester.exe
+#             name: oci-tester-Windows-i686.zip
+#
+#           - release_for: Windows-x86_64
+#             os: windows-latest
+#             target: x86_64-pc-windows-msvc
+#             bin: oci-tester.exe
+#             name: oci-tester-Windows-x86_64.zip
+#
+#           - release_for: macOS-x86_64
+#             os: macOS-latest
+#             target: x86_64-apple-darwin
+#             bin: oci-tester
+#             name: oci-tester-Darwin-x86_64.tar.gz
+#
+#           - release_for: macOS-aarch64
+#             os: macOS-latest
+#             target: aarch64-apple-darwin
+#             bin: oci-tester
+#             name: oci-tester-Darwin-aarch64.tar.gz
+#
+#     runs-on: ${{ matrix.platform.os }}
+#     steps:
+#       - name: Checkout
+#         uses: actions/checkout@v3
+#       - name: Build binary
+#         uses: houseabsolute/actions-rust-cross@v0
+#         with:
+#           target: ${{ matrix.platform.target }}
+#           args: "--locked --release"
+#           strip: true
+#       - name: Package as archive
+#         shell: bash
+#         run: |
+#           cd target/${{ matrix.platform.target }}/release
+#           if [[ "${{ matrix.platform.os }}" == "windows-latest" ]]; then
+#             7z a ../../../${{ matrix.platform.name }} ${{ matrix.platform.bin }}
+#           else
+#             tar czvf ../../../${{ matrix.platform.name }} ${{ matrix.platform.bin }}
+#           fi
+#           cd -
+#       - name: Generate SHA-256
+#         if: matrix.platform.os == 'macOS-latest'
+#         run: shasum -a 256 ${{ matrix.platform.name }}
+# - name: Publish GitHub release
+#   uses: softprops/action-gh-release@v1
+#   with:
+#     files: "oci-tester-*"
+#   env:
+#     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#   if: startsWith( github.ref, 'refs/tags/v' )
