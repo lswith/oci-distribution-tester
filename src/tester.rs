@@ -35,17 +35,19 @@ pub async fn load_test_push(
     host: String,
     auth: RegistryAuth,
     protocol: ClientProtocol,
+    namespace: String,
+    image: String,
+    tag: String,
 ) -> Vec<Result<PushResponse, LoadTestError>> {
     let mut handles = Vec::new();
 
     for i in 0..image_count {
         debug!("Kicking off push for image {i}");
-        let h = tokio::task::spawn(push_reg_image(
-            i,
-            host.clone(),
-            auth.clone(),
-            protocol.clone(),
-        ));
+
+        let reference: Reference = format!("{host}/{namespace}/{image}-{i}:{tag}")
+            .parse()
+            .unwrap();
+        let h = tokio::task::spawn(push_reg_image(reference, auth.clone(), protocol.clone()));
         handles.push(h);
     }
     debug!("Waiting for all pushes to complete");
@@ -62,15 +64,12 @@ pub async fn load_test_push(
 
 #[instrument(level = "debug", skip(auth, protocol))]
 async fn push_reg_image(
-    i: usize,
-    reg: String,
+    reference: Reference,
     auth: RegistryAuth,
     protocol: ClientProtocol,
 ) -> Result<PushResponse, OciDistributionError> {
     let layers = crate::fake::gen_rand_layers(10 * MEGABYTE, 1);
     let image = crate::fake::gen_image(layers).unwrap();
-
-    let reference: Reference = format!("{reg}/test/this-{i}:latest").parse().unwrap();
 
     let res = crate::client::push_image(
         image.layers,

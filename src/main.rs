@@ -24,6 +24,10 @@ enum Commands {
     /// Pushes a generated OCI image to an OCI distribution server.
     #[command()]
     PushImages {
+        /// The amount of images to push.
+        #[arg(short, long, value_name = "COUNT", default_value_t = 1)]
+        count: usize,
+
         /// The OCI distribution server url.
         #[arg(
             long,
@@ -36,14 +40,29 @@ enum Commands {
         #[arg(long, value_name = "REGISTRY_USERPASS")]
         reg_userpass: Option<String>,
 
-        /// The amount of images to push.
-        #[arg(short, long, value_name = "COUNT", default_value_t = 1)]
-        count: usize,
+        /// The image namespace. This will be used to generate the complete image.
+        /// Example: <namespace>/<image>-<count>:<tag>
+        #[arg(short, long, value_name = "IMAGE_NAMESPACE", default_value = "test")]
+        namespace: String,
+
+        /// The image name. This will be used to generate the complete image.
+        /// Example: <namespace>/<image>-<count>:<tag>
+        #[arg(short, long, value_name = "IMAGE", default_value = "this")]
+        image: String,
+
+        /// The image tag. This will be used to generate the complete image.
+        /// Example: <namespace>/<image>-<count>:<tag>
+        #[arg(short, long, value_name = "IMAGE_TAG", default_value = "latest")]
+        tag: String,
     },
 
     /// Pulls OCI images from an OCI distribution server.
     #[command()]
     PullImages {
+        /// The amount of images to pull.
+        #[arg(short, long, value_name = "COUNT", default_value_t = 1)]
+        count: usize,
+
         /// The OCI distribution server url.
         #[arg(
             long,
@@ -59,10 +78,6 @@ enum Commands {
         /// The image to pull.
         #[arg(short, long, value_name = "IMAGE", default_value = "alpine:latest")]
         image: String,
-
-        /// The amount of images to pull.
-        #[arg(short, long, value_name = "COUNT", default_value_t = 1)]
-        count: usize,
     },
 
     PushImageList {
@@ -117,7 +132,10 @@ async fn main() -> anyhow::Result<()> {
             reg_url,
             count,
             reg_userpass,
-        } => oci_tester::push_images(reg_url, count, reg_userpass).await,
+            namespace,
+            image,
+            tag,
+        } => oci_tester::push_images(reg_url, count, reg_userpass, namespace, image, tag).await,
         Commands::PushImageList {
             reg_url,
             reg_userpass,

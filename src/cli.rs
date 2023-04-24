@@ -94,6 +94,9 @@ pub async fn push_images(
     reg_url: String,
     count: usize,
     reg_userpass: Option<String>,
+    namespace: String,
+    image: String,
+    tag: String,
 ) -> Result<()> {
     let (reg, protocol) = parse_reg(&reg_url).context("couldn't parse the reg url: {reg_url}")?;
 
@@ -105,7 +108,7 @@ pub async fn push_images(
 
     info!(count = count, registry_url = reg_url, "Pushing images");
 
-    let results = load_test_push(count, reg, auth, protocol).await;
+    let results = load_test_push(count, reg, auth, protocol, namespace, image, tag).await;
 
     let total = results.len();
     let success = results
