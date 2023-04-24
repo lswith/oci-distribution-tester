@@ -8,23 +8,14 @@ on:
 
 env:
   CARGO_TERM_COLOR: always
-  PKG_CONFIG_SYSROOT_DIR: /
 
 jobs:
-  build:
+  buildtest:
     runs-on: ubuntu-latest
 
     steps:
       - uses: actions/checkout@v3
-      - name: Install musl
-        run: sudo apt install -y musl-gcc
-      # - name: Build
-      #   run: cargo build --verbose
-      # - name: Run tests
-      #   run: cargo test --verbose
-      - name: Build binary
-        uses: houseabsolute/actions-rust-cross@v0
-        with:
-          target: x86_64-unknown-linux-musl
-          args: "--locked --release"
-          strip: true
+      - name: Build
+        run: cargo build --verbose
+      - name: Run tests
+        run: cargo test --verbose
